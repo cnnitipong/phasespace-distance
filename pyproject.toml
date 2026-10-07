@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psdist"
+version = "1.1.0"
+description = "Compare two signals in reconstructed phase space: CPST and percentile Hausdorff distance"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Nitipong Praphaphankul", email = "nitipong.pr@chula.ac.th"}]
+requires-python = ">=3.8"
+dependencies = ["numpy>=1.21", "scipy>=1.7", "matplotlib>=3.5"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["psdist"]

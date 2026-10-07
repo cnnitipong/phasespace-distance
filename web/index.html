@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase-Space Distance — Nitipong Praphaphankul</title>
+<meta name="description" content="Interactive tool: compare two signals in reconstructed phase space with CPST and the percentile Hausdorff distance.">
+<meta name="theme-color" content="#fbfbf9">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<script>window.Plotly||document.write('<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"><\/script>')</script>
+<style>
+:root{--bg:#fbfbf9;--surface:#fff;--surface-2:#f4f4f2;--ink:#141414;--soft:#3a3a3a;--muted:#6b6b6b;--line:rgba(0,0,0,.12);--line-strong:rgba(0,0,0,.3);--chula:#DE5C8E;
+--display:"Newsreader",Georgia,"Times New Roman",serif;--body:"Inter",system-ui,-apple-system,"Helvetica Neue",sans-serif;--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;--maxw:1200px;--pad:clamp(20px,5vw,48px);--ease:cubic-bezier(.22,.61,.36,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--ink) var(--bg);scrollbar-width:thin}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}.mono{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+header{position:sticky;top:0;z-index:20;background:rgba(251,251,249,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:24px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
+.brand b{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--ink);font:500 10px var(--mono);letter-spacing:.05em}
+nav{display:flex;gap:22px;margin-left:auto;overflow-x:auto}nav a{font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color .2s}nav a:hover,nav a.on{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;text-decoration:none;padding:11px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;transition:background .2s,color .2s}
+.btn:hover{background:transparent;color:var(--ink)}.btn.ghost{background:transparent;color:var(--ink)}.btn.ghost:hover{background:var(--ink);color:#fff}
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center;padding:72px 0 40px}
+.kicker{display:flex;align-items:center;gap:10px}.kicker:before{content:"";width:6px;height:6px;background:var(--ink)}
+h1{font:500 clamp(40px,6vw,72px)/1.02 var(--display);letter-spacing:-.02em;margin:18px 0 22px}h1 em{color:var(--muted);font-style:normal}
+.lead{font:italic 400 clamp(18px,2vw,21px)/1.5 var(--display);color:var(--soft);max-width:34em;margin:0 0 28px}
+#hero3d{height:440px;border:1px solid var(--line);background:var(--surface)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:24px 0 8px}
+.kpi{padding:22px 20px;border-right:1px solid var(--line)}.kpi:last-child{border-right:0}
+.kpi .v{font:500 clamp(28px,3.4vw,42px)/1 var(--display);letter-spacing:-.02em;margin:10px 0 6px;font-variant-numeric:tabular-nums}.kpi .v.pink{color:var(--chula)}
+.kpi p{margin:0;font-size:13px;color:var(--muted)}
+section{padding:72px 0 24px;border-bottom:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:200px 1fr;gap:24px;margin-bottom:32px}
+.sec-head h2{font:500 clamp(26px,3vw,34px)/1.15 var(--display);letter-spacing:-.012em;margin:0 0 10px}.sec-head p{margin:0;color:var(--soft);max-width:46em}
+.grid2{display:grid;grid-template-columns:360px 1fr;gap:28px}.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.card{background:var(--surface);border:1px solid var(--line);padding:22px}
+.card h3{font:500 18px var(--display);margin:0 0 4px}.card .mono{display:block;margin-bottom:14px}
+.plot{background:var(--surface);border:1px solid var(--line);min-height:300px;position:relative}.plot.tall{height:480px}.plot.mid{height:360px}.plot.sm{height:280px}
+.cap{display:flex;justify-content:space-between;gap:12px;font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 2px 0}
+.seg{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--ink);margin-bottom:14px}
+.seg button{flex:1 1 auto;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:9px 8px;border:0;border-right:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;transition:background .2s}
+.seg button:last-child{border-right:0}.seg button.on{background:var(--ink);color:#fff}
+.row{margin:14px 0}.row label{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin-bottom:6px}.row label span{font:500 12px var(--mono);color:var(--ink)}
+input[type=range]{width:100%;appearance:none;height:2px;background:var(--line-strong);outline:none}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;background:var(--ink);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--ink);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;background:var(--ink);border:2px solid var(--bg);border-radius:0;cursor:pointer}
+.row label.check{display:flex;justify-content:flex-start;align-items:center;gap:8px;font-size:13px;color:var(--soft)}
+.drop{border:1px dashed var(--line-strong);padding:14px;margin:10px 0;font-size:13px;color:var(--soft);cursor:pointer;transition:border-color .2s,background .2s;display:block}
+.drop:hover{border-color:var(--ink);background:var(--surface-2)}.drop input{display:none}.drop b{display:block;font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.hide{display:none!important}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 18px}.steps li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--soft)}
+.steps li:before{content:"0" counter(s);font:500 11px var(--mono);letter-spacing:.1em;color:var(--chula);padding-top:3px}.steps b{color:var(--ink);font-weight:500}
+.formula{font:italic 400 21px/1.5 var(--display);background:var(--surface-2);border-left:0;padding:16px 18px;margin:0;color:var(--ink);overflow-x:auto;white-space:nowrap}
+.formula .n{font-style:normal}
+.pill{display:inline-block;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-strong);padding:4px 8px;margin-right:6px;color:var(--soft)}
+.verdict{font:400 20px/1.5 var(--display);margin:0 0 6px}.verdict b{font-weight:500;color:var(--chula)}
+pre{background:var(--ink);color:#e9e9e6;padding:20px;overflow-x:auto;font:400 13px/1.7 var(--mono);margin:0}pre .c{color:#8a8a86}pre .k{color:#f2a6c3}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:10px 8px;border-top:1px solid var(--line);text-align:left}th{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}td.num{font:500 13px var(--mono);text-align:right}
+footer{padding:48px 0 64px;color:var(--muted);font-size:13px}footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .8s var(--ease),transform .8s var(--ease)}.reveal.in{opacity:1;transform:none}
+.busy:after{content:"computing";position:absolute;right:12px;top:10px;font:400 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--chula)}
+@media (max-width:960px){.hero,.grid2,.grid2b{grid-template-columns:1fr}.sec-head{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(2){border-right:0}.kpi:nth-child(-n+2){border-bottom:1px solid var(--line)}nav{display:none}#hero3d{height:340px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="https://nitipong.com"><b>NP</b>Nitipong Praphaphankul</a>
+  <nav id="nav"><a href="#input">Input</a><a href="#embed">Embed</a><a href="#cpst">CPST</a><a href="#haus">Hausdorff</a><a href="#results">Results</a><a href="#code">Code</a></nav>
+  <a class="btn" href="https://github.com/cnnitipong/phasespace-distance" target="_blank" rel="noopener">GitHub</a>
+</div></header>
+
+<main class="wrap">
+<div class="hero">
+  <div class="reveal">
+    <p class="mono kicker">Tool · Phase-space distance · v1.0</p>
+    <h1>How different are<br>two signals? <em>Look at their shape in phase space.</em></h1>
+    <p class="lead">Time-delay embedding turns each signal into a trajectory. CPST measures how far the test trajectory drifts from the reference on average; the percentile Hausdorff distance finds the largest local gap. Everything below runs in your browser.</p>
+    <a class="btn" href="#input">Try it</a> <a class="btn ghost" href="#code">Python package</a>
+  </div>
+  <div class="reveal"><div id="hero3d"></div><div class="cap"><span>Live: reference (black) and test (pink) trajectories</span><span>Drag to rotate</span></div></div>
+</div>
+
+<div class="kpis reveal">
+  <div class="kpi"><span class="mono">CPST</span><div class="v pink" id="k-cpst">–</div><p>average distortion of the test trajectory</p></div>
+  <div class="kpi"><span class="mono">Hausdorff · Q<span class="qv">95</span></span><div class="v pink" id="k-haus">–</div><p>largest local gap, robust to outliers</p></div>
+  <div class="kpi"><span class="mono">Hausdorff · classical</span><div class="v" id="k-hcl">–</div><p>worst single gap (q = 100)</p></div>
+  <div class="kpi"><span class="mono">Embedding</span><div class="v" id="k-emb">–</div><p>delay τ, dimension m, points per trajectory</p></div>
+</div>
+
+<section id="input">
+  <div class="sec-head reveal"><p class="mono">01 / Input</p><div><h2>Choose two signals and the parameters</h2><p>Start with a mock pair, a two-tone wave whose trajectory is a clean knot, so you can see each change directly. Or upload your own reference and test signals as CSV files.</p></div></div>
+  <div class="grid2">
+    <div class="card reveal">
+      <div class="seg" id="src"><button class="on" data-v="mock">Mock signals</button><button data-v="csv">Upload CSV</button></div>
+      <div id="mockbox">
+        <span class="mono">What changes in the test signal</span>
+        <div class="seg" id="kind"><button class="on" data-v="shape">Shape</button><button data-v="global">Global</button><button data-v="local">Local</button><button data-v="frequency">Freq.</button><button data-v="noise">Noise</button></div>
+        <p id="kinddesc" style="font-size:13px;color:var(--muted);margin:-4px 0 6px"></p>
+        <div class="row"><label>Severity <span id="v-sev"></span></label><input type="range" id="sev" min="0" max="1" step="0.01" value="0.3"></div>
+        <div class="row"><label>Noise (std, both signals) <span id="v-noise"></span></label><input type="range" id="noise" min="0" max="0.3" step="0.005" value="0"></div>
+      </div>
+      <div id="csvbox" class="hide">
+        <label class="drop"><b>Reference signal</b><span id="f-ref">one column (amplitude) or two (time, amplitude)</span><input type="file" id="file-ref" accept=".csv,.txt"></label>
+        <label class="drop"><b>Test signal</b><span id="f-test">same length and sampling rate as the reference</span><input type="file" id="file-test" accept=".csv,.txt"></label>
+      </div>
+      <span class="mono" style="margin-top:22px">Parameters</span>
+      <div class="row"><label class="check"><input type="checkbox" id="autotau" checked> Delay τ from mutual information</label></div>
+      <div class="row"><label>Delay τ (samples) <span id="v-tau"></span></label><input type="range" id="tau" min="1" max="80" step="1" value="8"></div>
+      <div class="row"><label>Dimension m <span id="v-m"></span></label><input type="range" id="m" min="2" max="6" step="1" value="3"></div>
+      <div class="row"><label>CPST neighbours k <span id="v-k"></span></label><input type="range" id="k" min="1" max="15" step="1" value="5"></div>
+      <div class="row"><label>Hausdorff percentile q <span id="v-q"></span></label><input type="range" id="q" min="50" max="100" step="1" value="95"></div>
+    </div>
+    <div class="reveal">
+      <div class="plot tall" id="p-signals"></div>
+      <div class="cap"><span>Input · reference and test in time</span><span id="cap-n"></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="embed">
+  <div class="sec-head reveal"><p class="mono">02 / Embed</p><div><h2>Three samples, one point: the signal becomes a trajectory</h2><p>Each point of the trajectory is <i>X(n) = [x(n), x(n+τ), x(n+2τ), …]</i>. Move the slider: the three marked samples on the left are the coordinates of the highlighted point on the right. Both signals use the same τ and m.</p></div></div>
+  <div class="row reveal" style="max-width:520px"><label>Position n <span id="v-n"></span></label><input type="range" id="n" min="0" max="100" step="1" value="40"></div>
+  <div class="grid2b">
+    <div class="reveal"><div class="plot mid" id="p-embsig"></div><div class="cap"><span>Signal with x(n), x(n+τ), x(n+2τ)</span></div></div>
+    <div class="reveal"><div class="plot mid" id="p-emb3d"></div><div class="cap"><span>Reconstructed trajectory (first three axes)</span></div></div>
+    <div class="reveal"><div class="plot sm" id="p-ami"></div><div class="cap"><span>Choosing τ · average mutual information</span><span id="cap-ami"></span></div></div>
+    <div class="reveal"><div class="plot sm" id="p-fnn"></div><div class="cap"><span>Choosing m · false nearest neighbours</span></div></div>
+  </div>
+</section>
+
+<section id="cpst">
+  <div class="sec-head reveal"><p class="mono">03 / CPST</p><div><h2>Change in Phase Space Topology: the average drift</h2><p>For every test point, average its k nearest reference points into a centroid and measure the gap. CPST is the mean gap over the whole trajectory, so it responds to changes that are spread over the signal.</p></div></div>
+  <div class="grid2">
+    <div class="reveal">
+      <ol class="steps"><li><span><b>Pick a test point</b> sᵢ on the pink trajectory (slider below).</span></li><li><span><b>Find its k nearest</b> reference points (black dots) and average them into a centroid r̄ᵢ (white diamond).</span></li><li><span><b>Measure the gap</b> Eᵢ = ‖sᵢ − r̄ᵢ‖, the pink segment.</span></li><li><span><b>Average</b> all gaps: CPST = mean(Eᵢ).</span></li></ol>
+      <p class="formula">CPST <span class="n">=</span> <span class="n">1</span>/N <span class="n">Σ</span> ‖ s<sub>i</sub> − <span class="n">(1/k)</span> Σ<sub>j∈N<sub>k</sub>(i)</sub> r<sub>j</sub> ‖</p>
+      <div class="row"><label>Test point i <span id="v-i"></span></label><input type="range" id="ii" min="0" max="100" step="1" value="0"></div>
+      <p style="font-size:14px;color:var(--soft)">This point: <b id="ei"></b>. Mean of all points: <b id="cpst2" style="color:var(--chula)"></b></p>
+    </div>
+    <div class="reveal"><div class="plot tall" id="p-cpst3d"></div><div class="cap"><span>Test points coloured by Eᵢ · selected neighbourhood</span><span>Drag to rotate</span></div></div>
+  </div>
+  <div class="reveal" style="margin-top:24px"><div class="plot sm" id="p-ei"></div><div class="cap"><span>Local deviation Eᵢ along the trajectory · dashed line = CPST</span></div></div>
+</section>
+
+<section id="haus">
+  <div class="sec-head reveal"><p class="mono">04 / Hausdorff</p><div><h2>Percentile Hausdorff distance: the largest local gap</h2><p>Every point looks for its nearest neighbour on the other trajectory, in both directions. The classical Hausdorff distance keeps the single worst gap; the percentile version keeps the q-th percentile, so one bad sample cannot decide the result.</p></div></div>
+  <div class="grid2b">
+    <div class="reveal"><div class="plot tall" id="p-haus3d"></div><div class="cap"><span>Nearest-neighbour gaps · thick = Q<span class="qv">95</span> gap</span><span>Drag to rotate</span></div></div>
+    <div class="reveal"><div class="plot tall" id="p-cdf"></div><div class="cap"><span>Cumulative distribution of the gaps</span></div></div>
+  </div>
+  <p class="formula reveal" style="margin-top:24px">d<sub>H</sub> <span class="n">=</span> max { Q<sub>q</sub>( min<sub>j</sub> ‖s<sub>i</sub> − r<sub>j</sub>‖ ), Q<sub>q</sub>( min<sub>i</sub> ‖r<sub>j</sub> − s<sub>i</sub>‖ ) }</p>
+</section>
+
+<section id="results">
+  <div class="sec-head reveal"><p class="mono">05 / Results</p><div><h2>Output</h2><p>Both indices are in the units of the signal. Judge them against a healthy baseline, not zero: CPST has a small floor when k &gt; 1, and noise raises both.</p></div></div>
+  <div class="grid2b">
+    <div class="card reveal">
+      <p class="verdict" id="verdict"></p>
+      <table id="restable"></table>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="dl-json">Download JSON</button><button class="btn ghost" id="dl-csv">Download Eᵢ CSV</button></div>
+    </div>
+    <div class="reveal"><div class="plot mid" id="p-sweep"></div><div class="cap"><span>Response to severity for the current mock change</span><span>CPST black · d<sub>H</sub> pink</span></div></div>
+  </div>
+</section>
+
+<section id="code" style="border-bottom:0">
+  <div class="sec-head reveal"><p class="mono">06 / Code</p><div><h2>Same algorithm in Python</h2><p>The <span class="pill">psdist</span> package reproduces this page and the values reported in the PECT study. MIT licence.</p></div></div>
+  <div class="grid2b">
+<pre class="reveal"><span class="c"># pip install -r requirements.txt</span>
+<span class="k">import</span> psdist
+<span class="k">from</span> psdist.mock <span class="k">import</span> make_pair
+
+t, ref, test = make_pair(<span class="k">"shape"</span>, severity=0.3)
+psdist.cpst(ref, test, tau=8, m=3, k=5)        <span class="c"># 0.335</span>
+psdist.hausdorff(ref, test, tau=8, m=3, q=95)  <span class="c"># 0.418</span></pre>
+    <div class="card reveal">
+      <h3>Reference</h3><span class="mono">Cite this work</span>
+      <p style="font-size:14px;color:var(--soft);margin-top:0">Praphaphankul, N., Akutsu, A., Sasaki, E. Subsurface crack detection in asphalt-paved orthotropic steel bridge decks using pulsed eddy current testing and phase-space feature analysis (manuscript in preparation, 2026).</p>
+      <a class="btn" href="https://github.com/cnnitipong/phasespace-distance" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>© 2026 Nitipong Praphaphankul · Department of Architecture, Chulalongkorn University</span><a href="https://nitipong.com">nitipong.com</a></div></footer>
+
+<script>
+"use strict";
+/* ---------------- numerics (mirror of psdist/core.py) ---------------- */
+const INK="#141414",PINK="#DE5C8E",MUTED="#6b6b6b",LINE="rgba(0,0,0,.12)",SURF="#f4f4f2";
+function embed(x,tau,m){const n=x.length-(m-1)*tau;if(n<2)throw new Error("signal too short for τ and m");const X=new Array(n);for(let i=0;i<n;i++){const r=new Float64Array(m);for(let d=0;d<m;d++)r[d]=x[i+d*tau];X[i]=r}return X}
+function d2(a,b){let s=0;for(let i=0;i<a.length;i++){const t=a[i]-b[i];s+=t*t}return s}
+function knn(R,p,k){const bi=new Int32Array(k).fill(-1),bd=new Float64Array(k).fill(Infinity);for(let j=0;j<R.length;j++){const d=d2(p,R[j]);if(d<bd[k-1]){let q=k-1;while(q>0&&bd[q-1]>d){bd[q]=bd[q-1];bi[q]=bi[q-1];q--}bd[q]=d;bi[q]=j}}return{idx:bi,dist:bd}}
+function percentile(a,q){const s=Float64Array.from(a).sort(),p=(s.length-1)*q/100,l=Math.floor(p),h=Math.ceil(p);return s[l]+(s[h]-s[l])*(p-l)}
+function cpst(R,S,k){k=Math.min(k,R.length);const m=R[0].length,E=new Float64Array(S.length),C=[],NB=[];for(let i=0;i<S.length;i++){const r=knn(R,S[i],k),c=new Float64Array(m);for(const j of r.idx)for(let d=0;d<m;d++)c[d]+=R[j][d]/k;C.push(c);NB.push(r.idx);E[i]=Math.sqrt(d2(S[i],c))}return{value:E.reduce((a,b)=>a+b,0)/E.length,E,C,NB}}
+function nn(A,B){const d=new Float64Array(A.length),id=new Int32Array(A.length);for(let i=0;i<A.length;i++){const r=knn(B,A[i],1);d[i]=Math.sqrt(r.dist[0]);id[i]=r.idx[0]}return{d,id}}
+function hausdorff(R,S,q){const sr=nn(S,R),rs=nn(R,S),hsr=percentile(sr.d,q),hrs=percentile(rs.d,q),csr=Math.max(...sr.d),crs=Math.max(...rs.d);return{value:Math.max(hsr,hrs),classical:Math.max(csr,crs),sr,rs,hsr,hrs}}
+function ami(x,maxLag,bins=16){const mn=Math.min(...x),mx=Math.max(...x),w=(mx-mn)/bins||1,b=x.map(v=>Math.min(bins-1,Math.floor((v-mn)/w))),out=[];for(let L=0;L<=maxLag;L++){const n=x.length-L,P=new Float64Array(bins*bins),px=new Float64Array(bins),py=new Float64Array(bins);for(let i=0;i<n;i++){P[b[i]*bins+b[i+L]]++;px[b[i]]++;py[b[i+L]]++}let I=0;for(let a=0;a<bins;a++)for(let c=0;c<bins;c++){const p=P[a*bins+c]/n;if(p>0)I+=p*Math.log(p/(px[a]/n*py[c]/n))}out.push(I)}return out}
+function firstMin(c,smooth=1){let s=c;if(smooth>1){const w=smooth|1,h=w>>1;s=c.map((_,i)=>{let a=0;for(let j=-h;j<=h;j++)a+=c[Math.min(c.length-1,Math.max(0,i+j))];return a/w})}for(let i=1;i<s.length-1;i++)if(s[i]<s[i-1]&&s[i]<=s[i+1])return i;return s.length-1}
+function fnn(x,tau,maxM=5,rtol=10){const out=[];for(let m=1;m<=maxM;m++){let X;try{X=embed(x,tau,m+1)}catch(e){out.push(NaN);continue}const C=X.map(r=>r.slice(0,m));let f=0,c=0;for(let i=0;i<C.length;i++){const r=knn(C,C[i],2),j=r.idx[1],d=Math.sqrt(r.dist[1]);if(d>0){c++;if(Math.abs(X[i][m]-X[j][m])/d>rtol)f++}}out.push(c?f/c:0)}return out}
+/* ---------------- mock generator (mirror of psdist/mock.py) ---------------- */
+let seed=1;function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+function gauss(){let u=0,v=0;while(!u)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const DESC={shape:"The third harmonic grows: a systematic change of shape.",global:"The whole signal shrinks by a factor (1 − severity).",local:"A short burst appears once, at two thirds of the record.",frequency:"The base frequency rises by severity × 10 %.",noise:"Nothing changes; only noise is added (a healthy pair)."};
+function makePair(kind,sev,noise,n=600){const t=[],r=[],s=[];for(let i=0;i<n;i++){const ti=2*Math.PI*6*i/n;t.push(ti);r.push(Math.sin(ti)+0.45*Math.sin(3*ti+0.6))}
+ const t0=t[Math.floor(2*n/3)];for(let i=0;i<n;i++){const ti=t[i];let v;if(kind==="shape")v=Math.sin(ti)+(0.45+sev)*Math.sin(3*ti+0.6);else if(kind==="global")v=(1-sev)*r[i];else if(kind==="local")v=r[i]+2*sev*Math.exp(-(((ti-t0)/0.6)**2));else if(kind==="frequency"){const f=1+0.1*sev;v=Math.sin(f*ti)+0.45*Math.sin(3*f*ti+0.6)}else v=r[i];s.push(v)}
+ seed=7;if(noise>0)for(let i=0;i<n;i++){r[i]+=noise*gauss();s[i]+=noise*gauss()}return{t,ref:r,test:s}}
+function parseCSV(txt){const rows=txt.trim().split(/\r?\n/).map(l=>l.split(/[,;\t ]+/).filter(Boolean));if(isNaN(parseFloat(rows[0][0])))rows.shift();const two=rows[0].length>=2;return rows.map(r=>parseFloat(two?r[1]:r[0])).filter(v=>isFinite(v))}
+/* ---------------- state + UI ---------------- */
+const $=id=>document.getElementById(id),S={src:"mock",kind:"shape",csvRef:null,csvTest:null},CFG={displayModeBar:false,responsive:true};
+const FONT={family:"Inter, system-ui, sans-serif",size:12,color:"#3a3a3a"};
+const L2=(o={})=>Object.assign({paper_bgcolor:"#fff",plot_bgcolor:"#fff",font:FONT,margin:{l:56,r:18,t:16,b:44},showlegend:false,xaxis:{gridcolor:"#ececea",zeroline:false,linecolor:"#bdbdbb",ticks:"outside",tickcolor:"#bdbdbb"},yaxis:{gridcolor:"#ececea",zeroline:false,linecolor:"#bdbdbb",ticks:"outside",tickcolor:"#bdbdbb"}},o);
+const AX3=t=>({title:{text:t,font:{size:11,family:"JetBrains Mono, monospace",color:MUTED}},backgroundcolor:"#fbfbf9",gridcolor:"#e3e3e0",zerolinecolor:"#d0d0cd",showbackground:true,tickfont:{size:9,color:MUTED}});
+const L3=(cam)=>({paper_bgcolor:"#fff",font:FONT,margin:{l:0,r:0,t:0,b:0},showlegend:false,uirevision:"keep",scene:{xaxis:AX3("x(n)"),yaxis:AX3("x(n+τ)"),zaxis:AX3("x(n+2τ)"),camera:cam||{eye:{x:1.5,y:-1.5,z:0.9}},aspectmode:"cube"}});
+const col=(X,d)=>X.map(r=>r[d]);
+const line3=(X,c,w=3,o=1)=>({type:"scatter3d",mode:"lines",x:col(X,0),y:col(X,1),z:col(X,2),line:{color:c,width:w},opacity:o,hoverinfo:"skip"});
+const segs=(pairs,c,w,o=1)=>{const x=[],y=[],z=[];for(const[a,b]of pairs){x.push(a[0],b[0],null);y.push(a[1],b[1],null);z.push(a[2],b[2],null)}return{type:"scatter3d",mode:"lines",x,y,z,line:{color:c,width:w},opacity:o,hoverinfo:"skip"}};
+const fmt=v=>!isFinite(v)?"–":Math.abs(v)<1e-9?"0":Math.abs(v)>=100?v.toFixed(1):Math.abs(v)>=1?v.toFixed(3):v.toPrecision(3);
+let R3,S3,res={},timer;
+function seg(id,key){$(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...$(id).children].forEach(x=>x.classList.toggle("on",x===b));S[key]=b.dataset.v;if(key==="src"){$("mockbox").classList.toggle("hide",S.src!=="mock");$("csvbox").classList.toggle("hide",S.src!=="csv")}schedule()})}
+seg("src","src");seg("kind","kind");
+["sev","noise","tau","m","k","q","autotau"].forEach(id=>$(id).addEventListener("input",schedule));
+$("n").addEventListener("input",drawEmbed);$("ii").addEventListener("input",drawCPST);
+for(const w of["ref","test"])$("file-"+w).addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(txt=>{const v=parseCSV(txt);S["csv"+(w==="ref"?"Ref":"Test")]=v;$("f-"+w).textContent=`${f.name} · ${v.length} samples`;schedule()})});
+function schedule(){clearTimeout(timer);document.querySelectorAll(".plot").forEach(p=>p.classList.add("busy"));timer=setTimeout(compute,120)}
+function compute(){
+ const g=id=>parseFloat($(id).value);$("v-sev").textContent=g("sev").toFixed(2);$("v-noise").textContent=g("noise").toFixed(3);$("kinddesc").textContent=DESC[S.kind];
+ let t,ref,test;
+ if(S.src==="csv"){if(!S.csvRef||!S.csvTest){({t,ref,test}=makePair(S.kind,g("sev"),g("noise")))}else{const n=Math.min(S.csvRef.length,S.csvTest.length);ref=S.csvRef.slice(0,n);test=S.csvTest.slice(0,n);t=ref.map((_,i)=>i)}}else({t,ref,test}=makePair(S.kind,g("sev"),g("noise")));
+ const A=ami(ref,Math.min(120,Math.floor(ref.length/3)));let tau=g("tau");const tauA=Math.max(1,firstMin(A,S.src==="csv"?9:5));
+ if($("autotau").checked){tau=tauA;$("tau").value=tau}$("tau").disabled=$("autotau").checked;
+ const m=g("m"),k=g("k"),q=g("q");["tau","m","k","q"].forEach(id=>$("v-"+id).textContent=$(id).value);document.querySelectorAll(".qv").forEach(e=>e.textContent=q);
+ try{R3=embed(ref,tau,m);S3=embed(test,tau,m)}catch(e){alert(e.message);return}
+ const c=cpst(R3,S3,k),h=hausdorff(R3,S3,q),floor=cpst(R3,R3,k).value;
+ res={t,ref,test,tau,tauA,m,k,q,A,F:fnn(ref,tau,5),c,h,floor};
+ $("k-cpst").textContent=fmt(c.value);$("k-haus").textContent=fmt(h.value);$("k-hcl").textContent=fmt(h.classical);$("k-emb").textContent=`${tau} · ${m} · ${S3.length}`;
+ $("cap-n").textContent=`${ref.length} samples each`;$("n").max=S3.length-1;$("ii").max=S3.length-1;
+ let imax=0;c.E.forEach((v,i)=>{if(v>c.E[imax])imax=i});$("ii").value=imax;
+ drawAll();document.querySelectorAll(".plot").forEach(p=>p.classList.remove("busy"))}
+function drawAll(){drawHero();drawSignals();drawEmbed();drawAMI();drawCPST();drawHaus();drawResults()}
+function drawHero(){const tr=[line3(res.m>=3?R3:pad3(R3),INK,4),line3(res.m>=3?S3:pad3(S3),PINK,4)];const step=Math.max(1,Math.floor(S3.length/90)),pr=[];for(let i=0;i<S3.length;i+=step)pr.push([p3(S3[i]),p3(res.c.C[i])]);tr.push(segs(pr,PINK,1.5,.45));
+ const L=L3(heroCam);L.scene.xaxis.visible=L.scene.yaxis.visible=L.scene.zaxis.visible=false;Plotly.react("hero3d",tr,L,CFG)}
+const p3=r=>r.length>=3?r:[r[0],r[1],0];const pad3=X=>X.map(p3);
+function drawSignals(){const{t,ref,test}=res;Plotly.react("p-signals",[{x:t,y:ref,mode:"lines",line:{color:INK,width:2},name:"reference"},{x:t,y:test,mode:"lines",line:{color:PINK,width:2},name:"test"}],L2({showlegend:true,legend:{orientation:"h",x:0,y:1.08,font:{family:"JetBrains Mono",size:11}},margin:{l:50,r:16,t:36,b:44},xaxis:Object.assign(L2().xaxis,{title:{text:S.src==="mock"?"time":"sample",font:{size:12}}}),yaxis:Object.assign(L2().yaxis,{title:{text:"amplitude",font:{size:12}}})}),CFG)}
+function drawEmbed(){if(!res.c)return;const n=+$("n").value,{t,ref,tau,m}=res;$("v-n").textContent=n;const idx=[...Array(Math.min(3,m)).keys()].map(d=>n+d*tau);
+ Plotly.react("p-embsig",[{x:t,y:ref,mode:"lines",line:{color:INK,width:1.6}},{x:idx.map(i=>t[i]),y:idx.map(i=>ref[i]),mode:"markers+text",text:["x(n)","x(n+τ)","x(n+2τ)"].slice(0,idx.length),textposition:"top center",textfont:{color:PINK,family:"JetBrains Mono",size:11},marker:{color:PINK,size:12,symbol:["circle","square","diamond"],line:{color:"#fff",width:1.5}}}],L2({xaxis:Object.assign(L2().xaxis,{range:[t[Math.max(0,n-tau)],t[Math.min(t.length-1,n+3*tau)]]})}),CFG);
+ const X=pad3(R3);Plotly.react("p-emb3d",[{type:"scatter3d",mode:"markers",x:col(X,0),y:col(X,1),z:col(X,2),marker:{size:2.2,color:X.map((_,i)=>i),colorscale:[[0,"#d6d6d3"],[1,INK]]},hoverinfo:"skip"},{type:"scatter3d",mode:"markers",x:[X[n][0]],y:[X[n][1]],z:[X[n][2]],marker:{size:9,color:PINK,line:{color:"#fff",width:2}},hoverinfo:"skip"}],L3(),CFG)}
+function drawAMI(){const{A,tau,tauA,F}=res;Plotly.react("p-ami",[{y:A,mode:"lines",line:{color:INK,width:2}},{x:[tauA,tauA],y:[Math.min(...A),Math.max(...A)],mode:"lines",line:{color:PINK,dash:"dash",width:2}}],L2({xaxis:Object.assign(L2().xaxis,{title:{text:"delay τ (samples)",font:{size:11}}}),annotations:[{x:tauA,y:Math.max(...A)*.92,text:`first minimum τ = ${tauA}`,showarrow:false,xanchor:"left",xshift:6,font:{color:PINK,family:"JetBrains Mono",size:11}}]}),CFG);
+ $("cap-ami").textContent=`τ used: ${tau}`;Plotly.react("p-fnn",[{type:"bar",x:[1,2,3,4,5],y:F.map(v=>v*100),marker:{color:[1,2,3,4,5].map(v=>v===res.m?PINK:"#bdbdbb")},text:F.map(v=>isFinite(v)?(v*100).toFixed(1)+"%":""),textposition:"outside",textfont:{family:"JetBrains Mono",size:10},cliponaxis:false}],L2({xaxis:Object.assign(L2().xaxis,{title:{text:"embedding dimension m",font:{size:11}},dtick:1}),yaxis:Object.assign(L2().yaxis,{title:{text:"false neighbours (%)",font:{size:11}},rangemode:"tozero"})}),CFG)}
+function drawCPST(){if(!res.c)return;const i=+$("ii").value,{c}=res;$("v-i").textContent=i;$("ei").textContent=`Eᵢ = ${fmt(c.E[i])}`;$("cpst2").textContent=fmt(c.value);
+ const X=pad3(R3),Y=pad3(S3),nb=[...c.NB[i]].map(j=>X[j]),cen=p3(c.C[i]),s=Y[i];
+ Plotly.react("p-cpst3d",[line3(X,INK,2,.35),{type:"scatter3d",mode:"markers",x:col(Y,0),y:col(Y,1),z:col(Y,2),marker:{size:3,color:Array.from(c.E),colorscale:[[0,"#f4f4f2"],[.35,"#efb4ca"],[.7,PINK],[1,"#5b1533"]],colorbar:{thickness:10,len:.6,title:{text:"Eᵢ",font:{size:11}},tickfont:{size:9},outlinewidth:0}},hovertemplate:"Eᵢ %{marker.color:.4f}<extra></extra>"},
+  segs(nb.map(p=>[s,p]),MUTED,2,.8),{type:"scatter3d",mode:"markers",x:col(nb,0),y:col(nb,1),z:col(nb,2),marker:{size:5,color:INK},hoverinfo:"skip"},{type:"scatter3d",mode:"markers",x:[cen[0]],y:[cen[1]],z:[cen[2]],marker:{size:7,symbol:"diamond",color:"#fff",line:{color:INK,width:2}},hoverinfo:"skip"},segs([[s,cen]],PINK,7),{type:"scatter3d",mode:"markers",x:[s[0]],y:[s[1]],z:[s[2]],marker:{size:8,color:PINK,line:{color:"#fff",width:2}},hoverinfo:"skip"}],L3(),CFG);
+ const E=Array.from(c.E);Plotly.react("p-ei",[{y:E,mode:"lines",line:{color:PINK,width:1.4},fill:"tozeroy",fillcolor:"rgba(222,92,142,.12)"},{x:[0,E.length-1],y:[c.value,c.value],mode:"lines",line:{color:INK,dash:"dash",width:1.6}},{x:[i],y:[E[i]],mode:"markers",marker:{color:INK,size:9}}],L2({margin:{l:56,r:18,t:10,b:40},xaxis:Object.assign(L2().xaxis,{title:{text:"test point i",font:{size:11}}}),yaxis:Object.assign(L2().yaxis,{title:{text:"Eᵢ",font:{size:11}}})}),CFG)}
+function drawHaus(){const{h,q}=res,X=pad3(R3),Y=pad3(S3),st=Math.max(1,Math.floor(Y.length/120));const a=[],b=[];for(let i=0;i<Y.length;i+=st)a.push([Y[i],X[h.sr.id[i]]]);for(let j=Math.floor(st/2);j<X.length;j+=st)b.push([X[j],Y[h.rs.id[j]]]);
+ const near=(d,v)=>{let k=0;d.forEach((x,i)=>{if(Math.abs(x-v)<Math.abs(d[k]-v))k=i});return k};const i1=near(h.sr.d,h.hsr),j1=near(h.rs.d,h.hrs);
+ Plotly.react("p-haus3d",[line3(X,INK,3),line3(Y,PINK,3),segs(a,PINK,1.5,.55),segs(b,MUTED,1.5,.55),segs([[Y[i1],X[h.sr.id[i1]]]],PINK,9),segs([[X[j1],Y[h.rs.id[j1]]]],INK,9)],L3(),CFG);
+ const cdf=(d)=>{const s=Float64Array.from(d).sort();return{x:Array.from(s),y:Array.from(s,(_,i)=>(i+1)/s.length)}};const A=cdf(h.sr.d),B=cdf(h.rs.d),ymax=1.02;
+ Plotly.react("p-cdf",[{...A,mode:"lines",line:{color:PINK,width:2.4,shape:"hv"},name:"test → reference"},{...B,mode:"lines",line:{color:INK,width:2.4,dash:"dash",shape:"hv"},name:"reference → test"},{x:[h.value,h.value],y:[0,ymax],mode:"lines",line:{color:PINK,width:2},showlegend:false},{x:[h.classical,h.classical],y:[0,ymax],mode:"lines",line:{color:MUTED,width:1.5,dash:"dot"},showlegend:false}],
+  L2({showlegend:true,legend:{x:.02,y:.98,font:{family:"JetBrains Mono",size:11},bgcolor:"rgba(255,255,255,.8)"},xaxis:Object.assign(L2().xaxis,{title:{text:"gap to the nearest point of the other trajectory",font:{size:11}}}),yaxis:Object.assign(L2().yaxis,{title:{text:"cumulative fraction",font:{size:11}},range:[0,ymax]}),shapes:[{type:"line",xref:"paper",x0:0,x1:1,y0:q/100,y1:q/100,line:{color:"#bdbdbb",dash:"dot",width:1}}],
+  annotations:[{x:h.value,y:.3,text:`d<sub>H</sub> (Q${q}) = ${fmt(h.value)}`,showarrow:false,xanchor:"right",xshift:-6,font:{color:PINK,family:"JetBrains Mono",size:12}},{x:h.value,y:.18,text:`classical = ${fmt(h.classical)}`,showarrow:false,xanchor:"right",xshift:-6,font:{color:MUTED,family:"JetBrains Mono",size:11}}]}),CFG)}
+function drawResults(){const{c,h,floor,tau,m,k,q}=res,ratio=c.value/Math.max(floor,1e-12);
+ const lr=h.value/Math.max(c.value,1e-12);
+ $("verdict").innerHTML=c.value<1e-9?"The two trajectories coincide: <b>no difference</b>.":`The largest local gap is <b>${lr.toFixed(1)}×</b> the average gap: ${lr>2.5?"a <b>localised</b> change, concentrated on part of the trajectory.":"a <b>spread-out</b> change, present along most of the trajectory."}`+(floor>1e-9?` CPST is <b>${ratio.toFixed(1)}×</b> its self-floor.`:"");
+ const rows=[["CPST",c.value],["CPST self-floor (reference vs itself)",floor],[`Percentile Hausdorff (Q${q})`,h.value],["  test → reference",h.hsr],["  reference → test",h.hrs],["Classical Hausdorff",h.classical],["Delay τ / dimension m / k",`${tau} / ${m} / ${k}`]];
+ $("restable").innerHTML="<tr><th>Quantity</th><th style='text-align:right'>Value</th></tr>"+rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${typeof r[1]==="number"?fmt(r[1]):r[1]}</td></tr>`).join("");
+ if(S.src==="mock"){const sv=[...Array(11).keys()].map(i=>i/10*Math.max(.1,+$("sev").max)),cc=[],hh=[];for(const s of sv){const p=makePair(S.kind,s,+$("noise").value,res.ref.length),Rr=embed(p.ref,res.tau,m),Ss=embed(p.test,res.tau,m);cc.push(cpst(Rr,Ss,k).value);hh.push(hausdorff(Rr,Ss,q).value)}
+  Plotly.react("p-sweep",[{x:sv,y:cc,mode:"lines+markers",line:{color:INK,width:2},marker:{size:6}},{x:sv,y:hh,mode:"lines+markers",line:{color:PINK,width:2},marker:{size:6,symbol:"square"}},{x:[+$("sev").value],y:[c.value],mode:"markers",marker:{size:12,color:"rgba(0,0,0,0)",line:{color:INK,width:2}}}],L2({xaxis:Object.assign(L2().xaxis,{title:{text:`severity · ${S.kind}`,font:{size:11}}}),yaxis:Object.assign(L2().yaxis,{title:{text:"index value",font:{size:11}}})}),CFG)}
+ else Plotly.react("p-sweep",[],L2({annotations:[{text:"Sweep is available for mock signals",showarrow:false,font:{color:MUTED}}],xaxis:{visible:false},yaxis:{visible:false}}),CFG)}
+function download(name,txt,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$("dl-json").onclick=()=>download("phasespace-distance.json",JSON.stringify({cpst:res.c.value,cpst_self_floor:res.floor,hausdorff_q:res.h.value,q:res.q,hausdorff_test_to_ref:res.h.hsr,hausdorff_ref_to_test:res.h.hrs,hausdorff_classical:res.h.classical,tau:res.tau,m:res.m,k:res.k,n_points:S3.length},null,2),"application/json");
+$("dl-csv").onclick=()=>download("cpst_local_deviation.csv","i,E_i\n"+Array.from(res.c.E,(v,i)=>`${i},${v}`).join("\n"),"text/csv");
+/* hero auto-rotation (stops when the user drags) */
+let heroCam={eye:{x:1.6,y:-1.2,z:.7}},ang=0,spin=true;
+function rotate(){if(spin&&window.Plotly&&res.c&&!document.hidden){ang+=.004;const r=1.95;heroCam={eye:{x:r*Math.cos(ang-.6),y:r*Math.sin(ang-.6),z:.75}};Plotly.relayout("hero3d",{"scene.camera":heroCam})}setTimeout(rotate,50)}
+$("hero3d").addEventListener("pointerdown",()=>spin=false);
+/* reveal + nav highlight */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.08});document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id))}),{rootMargin:"-45% 0px -50% 0px"});document.querySelectorAll("section").forEach(s=>so.observe(s));
+window.addEventListener("load",()=>{if(!window.Plotly){document.body.insertAdjacentHTML("afterbegin","<p style='padding:12px;background:#DE5C8E;color:#fff;margin:0'>Plotly could not be loaded; check your connection.</p>");return}compute();rotate()});
+</script>
+</body>
+</html>
